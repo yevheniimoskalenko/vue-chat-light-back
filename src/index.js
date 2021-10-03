@@ -30,6 +30,20 @@ io.on("connection", (socket) => {
     socket.join(data.room);
     users.remove(socket.id);
 
+    socket.on("typing", (data) => {
+      const user = users.get(data);
+
+      socket.broadcast
+        .to(user.room)
+        .emit("userTyping", { typing: true, name: user.name });
+
+      socket.on("stopTyping", () => {
+        socket.broadcast
+          .to(user.room)
+          .emit("stopTypings", { typing: false, name: user.name });
+      });
+    });
+
     users.add({
       id: socket.id,
       name: data.name,
